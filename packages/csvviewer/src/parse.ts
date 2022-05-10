@@ -496,6 +496,9 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     maxRows = 0xffffffff
   } = options;
 
+  let commentDelimiter = '#';
+  let commentIndex;
+
   // ncols will be set automatically if it is undefined.
   let ncols = options.ncols;
 
@@ -520,9 +523,17 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
 
   // Loop through rows until we run out of data or we've reached maxRows.
   while (nextRow !== -1 && nrows < maxRows && currRow < len) {
-    // Store the offset for the beginning of the row and increment the rows.
-    offsets.push(currRow);
-    nrows++;
+    // console.log(data)
+    console.log(currRow)
+    // if (data.charAt(currRow) === '#') {
+    //   nextRow = data.indexOf(rowDelimiter, currRow);
+    //   rowEnd = nextRow === -1 ? len : nextRow;
+    //   currRow = rowEnd + rowDelimiterLength;
+    //   continue;
+    // }
+
+    // a,b,c#comment\n
+    // d,e,f
 
     // Find the next row delimiter.
     nextRow = data.indexOf(rowDelimiter, currRow);
@@ -530,6 +541,16 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     // If the next row delimiter is not found, set the end of the row to the
     // end of the data string.
     rowEnd = nextRow === -1 ? len : nextRow;
+
+    commentIndex = data.indexOf(commentDelimiter, currRow);
+    if (commentIndex === currRow){
+      currRow = rowEnd + rowDelimiterLength;
+      continue;
+    }
+
+    // Store the offset for the beginning of the row and increment the rows.
+    offsets.push(currRow);
+    nrows++;
 
     // If we are returning column offsets, push them onto the array.
     if (columnOffsets === true) {

@@ -329,8 +329,110 @@ describe('csvviewer/parsenoquotes', () => {
       expect(results.ncols).toEqual(3);
       expect(results.offsets).toEqual([0, 2, 4, 6, 7, 9, 15, 17, 18]);
     });
+
+    // MY TEST
+
+    it('MYTEST: handles adding columns or merging columns as necessary', () => {
+      const data = `a,b,c\nd,e,f,g\nh,i\nj`;
+      const options = { data, rowDelimiter: '\n' };
+      let results;
+
+      results = parser({ ...options, columnOffsets: false });
+      expect(results.nrows).toEqual(4);
+      expect(results.offsets).toEqual([0, 6, 14, 18]);
+
+      results = parser({ ...options, columnOffsets: true });
+      expect(results.nrows).toEqual(4);
+      expect(results.ncols).toEqual(3);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 8, 10, 14, 16, 17, 18, 19, 19]);
+    });
+
+    // COMMENT TEST
+
+    it('MYTEST: handles comments at the beginning of the file', () => {
+      const data = `# a,b\na,b,c\nd,e,f,g\nh,i\nj`;
+      const options = { data, rowDelimiter: '\n' };
+      let results;
+
+      results = parser({ ...options, columnOffsets: false });
+      expect(results.nrows).toEqual(4);
+      expect(results.offsets).toEqual([6, 12, 20, 24]);
+
+      results = parser({ ...options, columnOffsets: true });
+      expect(results.nrows).toEqual(4);
+      expect(results.ncols).toEqual(3);
+      expect(results.offsets).toEqual([6, 8, 10, 12, 14, 16, 20, 22, 23, 24, 25, 25]);
+    });
+
+    // COMMENT between lines
+
+    it('MYTEST: handles comments between rows', () => {
+      const data = `a,b,c\nd,e,f,g\n# a,b\nh,i\nj`;
+      const options = { data, rowDelimiter: '\n' };
+      let results;
+
+      results = parser({ ...options, columnOffsets: false });
+      expect(results.nrows).toEqual(4);
+      expect(results.offsets).toEqual([0, 6, 20, 24]);
+
+      results = parser({ ...options, columnOffsets: true });
+      expect(results.nrows).toEqual(4);
+      expect(results.ncols).toEqual(3);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 8, 10, 20, 22, 23, 24, 25, 25]);
+    });
+
+    // COMMENT as the last line
+
+    it('MYTEST: handles comments as the last line of files', () => {
+      const data = `a,b,c\nd,e,f,g\nh,i\nj\n# a,b`;
+      const options = { data, rowDelimiter: '\n' };
+      let results;
+
+      results = parser({ ...options, columnOffsets: false });
+      expect(results.nrows).toEqual(4);
+      expect(results.offsets).toEqual([0, 6, 14, 18]);
+
+      results = parser({ ...options, columnOffsets: true });
+      expect(results.nrows).toEqual(4);
+      expect(results.ncols).toEqual(3);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 8, 10, 14, 16, 17, 18, 19, 19]);
+    });
   });
 });
+
+// TEST DRAFT
+
+    // it('handles a max row argument', () => {
+    //   const data = `# a,c\na,b,c,d\n0,1,2,3\n4,5,6,7\n`;
+    //   const options = { data, rowDelimiter: '\n', maxRows: 2 };
+    //   let results;
+
+    //   results = parser({ ...options, columnOffsets: false, Comm: false });
+    //   expect(results.nrows).toEqual(2);
+    //   expect(results.offsets).toEqual([0, 8]);
+
+    //   results = parser({ ...options, columnOffsets: true, Comm: true });
+    //   expect(results.nrows).toEqual(2);
+    //   expect(results.ncols).toEqual(4);
+    //   expect(results.offsets).toEqual([0, 2, 4, 6, 8, 10, 12, 14]);
+    // });
+
+
+// EXPLANATION 
+
+/**
+     * The index offsets into the data string for the rows or data items.
+     *
+     * #### Notes
+     * If the columnOffsets argument to the parser is false, the offsets array
+     * will be an array of length nrows, where `offsets[r]` is the index of the
+     * first character of row r.
+     *
+     * If the columnOffsets argument to the parser is true, the offsets array
+     * will be an array of length `nrows*ncols`, where `offsets[r*ncols + c]` is
+     * the index of the first character of the item in row r, column c.
+     */
+
 
 // Helpful debugging logging
 // console.log(Array.from(results.offsets));
