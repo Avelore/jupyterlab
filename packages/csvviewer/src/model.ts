@@ -44,6 +44,7 @@ export class DSVModel extends DataModel implements IDisposable {
     let {
       data,
       delimiter = ',',
+      // comment = '#',
       rowDelimiter = undefined,
       quote = '"',
       quoteParser = undefined,
@@ -52,6 +53,7 @@ export class DSVModel extends DataModel implements IDisposable {
     } = options;
     this._rawData = data;
     this._delimiter = delimiter;
+    // this._comment = comment;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
     this._initialRows = initialRows;
@@ -529,6 +531,7 @@ export class DSVModel extends DataModel implements IDisposable {
     // Declare local variables.
     let value: string;
     let nextIndex;
+    let commentIndex;
 
     // Find the index for the first character in the field.
     const index = this.getOffsetIndex(row, column);
@@ -584,6 +587,14 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Slice the actual value out of the data string.
     value = this._rawData.slice(index + trimLeft, nextIndex - trimRight);
+    
+    // Drop comments, if any
+    commentIndex = value.indexOf('#');
+    if(commentIndex !== -1) {
+      value = value.slice(0, commentIndex);
+      // console.log(value);
+      // console.log(commentIndex);
+    }
 
     // If we have a quoted field and we have an escaped quote inside it, unescape it.
     if (trimLeft === 1 && value.indexOf(this._quote) !== -1) {
@@ -691,6 +702,11 @@ export namespace DSVModel {
      * The field delimiter must be a single character.
      */
     delimiter: string;
+
+    /**
+     * The comment character '#'.
+     */
+    // comment: string;
 
     /**
      * The data source for the data model.

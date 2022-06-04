@@ -335,5 +335,19 @@ describe('csvviewer/model', () => {
       expect([0, 1, 2].map(i => d.data('body', 1, i))).toEqual(['f', 'g', 'h']);
       expect([0, 1, 2].map(i => d.data('body', 2, i))).toEqual(['i', 'j', 'k']);
     });
+
+    it('MYTEST: handles comments ', () => {
+      const d = new DSVModel({ data: 'a,b,c\nd,e,f#aba', delimiter: ',' });
+      expect(d.rowCount('column-header')).toBe(1);
+      expect(d.rowCount('body')).toBe(1);
+      expect(d.columnCount('row-header')).toBe(1);
+      expect(d.columnCount('body')).toBe(3);
+      expect([0, 1, 2].map(i => d.data('column-header', 0, i))).toEqual([
+        'a',
+        'b',
+        'c'
+      ]);
+      expect([0, 1, 2].map(i => d.data('body', 0, i))).toEqual(['d', 'e', 'f']);
+    });
   });
 });
